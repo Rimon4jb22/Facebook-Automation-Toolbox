@@ -1,0 +1,102 @@
+/*
+======================================================================
+Facebook Auto Check & Send Invitations ( In Meta Business Suite Home)
+======================================================================
+
+Description:
+- This script is designed for the Facebook Invite popup in Meta Business Suite.
+- Go to Meta Business Suite Home -> Grow Your Audience -> Click "Invite Friends" / "Send Invitations" 
+- Keep the Invite popup open and run this script from the browser console.
+- Automatically clicks all visible "unchecked" checkboxes.
+- Skips checkboxes that are already selected.
+- Displays Reports:• Already Selected, • Attempted Clicks, • Successfully Selected, • Failed Selections, • Final Total Selected
+- Automatically clicks the invitation confirmation button.
+
+- Note: Update the button name in the script before running if it changes the confirmation button text (e.g., "Send Invitations" or "Invite Friends") .
+
+Environment:
+- Browser Developer Console
+
+Dependencies:
+- None
+
+How to Run:
+1. Open the target Facebook page.
+2. Press F12 or Ctrl + Shift + I. Open the Console tab.
+3. Paste this script.
+4. Press Enter.
+
+Install Command:
+# No installation required.
+
+Run Command:
+# Paste into the browser console and press Enter.
+======================================================================
+*/
+
+(() => {
+    const checkboxes = document.querySelectorAll(
+        'div[role="checkbox"], input[type="checkbox"]'
+    );
+
+    let alreadySelected = 0;
+    let attempted = 0;
+
+    const clickedCheckboxes = [];
+
+    // First Pass
+    checkboxes.forEach((checkbox) => {
+        const checked =
+            checkbox.getAttribute("aria-checked") === "true" ||
+            checkbox.checked === true;
+
+        if (checked) {
+            alreadySelected++;
+        } else {
+            checkbox.click();
+            clickedCheckboxes.push(checkbox);
+            attempted++;
+        }
+    });
+
+    // Verify only clicked checkboxes
+    setTimeout(() => {
+        let successfullySelected = 0;
+
+        clickedCheckboxes.forEach((checkbox) => {
+            if (
+                checkbox.getAttribute("aria-checked") === "true" ||
+                checkbox.checked === true
+            ) {
+                successfullySelected++;
+            }
+        });
+
+        const failedSelections = attempted - successfullySelected;
+        const finalSelected = alreadySelected + successfullySelected;
+
+        console.clear();
+        console.log("========== Facebook Invitation Report ==========");
+        console.log(`Already Selected      : ${alreadySelected}`);
+        console.log(`Attempted Clicks      : ${attempted}`);
+        console.log(`Successfully Selected : ${successfullySelected}`);
+        console.log(`Failed Selections     : ${failedSelections}`);
+        console.log(`Final Total Selected  : ${finalSelected}`);
+        console.log("================================================");
+
+        // Click the confirmation button
+        const sendButton = [...document.querySelectorAll("button, div[role='button']")]
+            .find((element) =>
+                element.textContent.includes("Send Invitations")
+            );
+
+        if (sendButton) {
+            sendButton.click();
+            console.log("✅ Invitations sent successfully.");
+        } else {
+            console.log(
+                '❌ "Send Invitations" button not found. Plz Check the button text, update the script, and try again.'
+            );
+        }
+    }, 500);
+})();
